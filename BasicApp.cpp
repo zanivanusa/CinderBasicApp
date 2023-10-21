@@ -114,15 +114,24 @@ namespace PhysicsEngine {
 				if (distance < minDistance) {
 					// Compute the unit vector of displacement
 					glm::vec2 collisionNormal = glm::normalize(displacement);
-
-					// Reflect velocities
-					ballA->velocity = glm::reflect(ballA->velocity, collisionNormal);
-					ballB->velocity = glm::reflect(ballB->velocity, collisionNormal);
-
-					// Reposition balls so they are not overlapping
 					float overlap = minDistance - distance;
-					ballA->position -= collisionNormal * overlap * 0.5f;
-					ballB->position += collisionNormal * overlap * 0.5f;
+					//since (i suppose) we do not want our dragged ball to move,
+					if (ballA->isBeingDragged && !ballB->isBeingDragged) {
+						ballB->position += collisionNormal * overlap;
+						ballB->velocity = glm::reflect(ballB->velocity, collisionNormal);
+					}
+					else if (ballB->isBeingDragged && !ballA->isBeingDragged) {
+						ballA->position -= collisionNormal * overlap;
+						ballA->velocity = glm::reflect(ballA->velocity, collisionNormal);
+					}
+					else if (!ballA->isBeingDragged && !ballB->isBeingDragged) {
+						// Both balls are not being dragged, use original logic
+						ballA->position -= collisionNormal * overlap * 0.5f;
+						ballB->position += collisionNormal * overlap * 0.5f;
+
+						ballA->velocity = glm::reflect(ballA->velocity, collisionNormal);
+						ballB->velocity = glm::reflect(ballB->velocity, collisionNormal);
+					}
 				}
 			}
 		}
